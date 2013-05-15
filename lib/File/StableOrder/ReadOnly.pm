@@ -9,7 +9,9 @@ sub new {
 	
 	my $self = bless $class->SUPER::new(%params), $class;
 	
-	$self->_open("<", $self->{filename});
+	eval {
+		$self->_open("<", $self->{filename});
+	};
 	
 	return $self;
 }

@@ -21,6 +21,13 @@ sub size {
 	return (-s $self->{filename}) || 0;
 }
 
+sub rewind {
+	my ($self) = @_;
+
+	$self->_seek(0, 0); # Start of File
+	$self->{_pos} = 0;
+}
+
 sub _open {
 	my ($self, $mode, $filename) = @_;
 
@@ -41,7 +48,7 @@ sub _seek {
 sub _readline {
 	my ($self) = @_;
 
-	my $io = $self->{_fh};
+	my $io = $self->{_fh} or return undef;
 	my $line = <$io>;
 	chomp $line if defined $line;
 	return $line;
@@ -65,14 +72,14 @@ sub _truncate {
 sub _close {
 	my ($self) = @_;
 	
-	my $io = delete $self->{_fh};
+	my $io = delete $self->{_fh} or return;
 	close $io;
 }
 
 sub DESTROY {
 	my ($self) = @_;
 	
-	$self->_close($self->{_fh});
+	$self->_close();
 }
 
 1;
