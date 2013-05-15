@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings FATAL => 'all';
 use Test::More;
-use File::StableOrder::ReadWrite;
+use File::StableOrder;
 
 plan tests => 3;
 
@@ -44,8 +44,9 @@ my $file;
 
 # SIMPLE LOOP
 testfile_create($testfile, 1 .. 10000);
-$file = File::StableOrder::ReadWrite->new(
-	filename => $testfile
+$file = File::StableOrder->new(
+	filename => $testfile,
+	mode     => "rw",
 );
 while(my $item = $file->readline()){
 	$item->{i} = $item->{i}+1; 
@@ -59,8 +60,9 @@ ok(testfile_check($testfile, 2 .. 10001), "Inc loop");
 # RANDOM RETURNS
 my @arr;
 testfile_create($testfile, 3 .. 10000);
-$file = File::StableOrder::ReadWrite->new(
-	filename => $testfile
+$file = File::StableOrder->new(
+	filename => $testfile,
+	mode     => "rw",
 );
 while(my $item = $file->readline()){
 	$item->{i} = $item->{i}+1; 
@@ -80,8 +82,9 @@ ok(testfile_check($testfile, 4 .. 10001), "Random return loop");
 # INCOMPLETE FILE
 testfile_create($testfile, 3 .. 10000);
 testfile_create($testfile_incomplete, 4 .. 100);
-$file = File::StableOrder::ReadWrite->new(
+$file = File::StableOrder->new(
 	filename => $testfile,
+	mode     => "rw",
 	continue => 1,
 );
 while(my $item = $file->readline()){

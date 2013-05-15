@@ -3,6 +3,12 @@ package File::StableOrder;
 use 5.006;
 use strict;
 use warnings FATAL => 'all';
+use feature qw/switch/;
+
+use Carp;
+use File::StableOrder::ReadOnly;
+use File::StableOrder::ReadWrite;
+use File::StableOrder::WriteOnly;
 
 =head1 NAME
 
@@ -25,8 +31,20 @@ Perhaps a little code snippet.
 
     use File::StableOrder;
 
-    my $foo = File::StableOrder->new();
+    my $foo = File::StableOrder->new(
+    	filename => "file.txt",
+	mode     => "r",          # "r", "rw", "w"
+	...
+	# for Read-Write
+	truncate => 1, # truncate file if there are previous results in file OR
+	continue => 1, # continue processing from last element
+    );
     ...
+    while(my $item = $foo->readline()){
+       $item->{i} = int($item->{i}) + 1;
+       
+       $foo->returnline($item);
+    }
 
 =head1 EXPORT
 
@@ -39,14 +57,18 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =cut
 
-sub function1 {
-}
+sub new {
+	my ($class, %params) = @_;
 
-=head2 function2
-
-=cut
-
-sub function2 {
+	my $mode = delete $params{mode};
+	given($mode){
+		when("r"){  return File::StableOrder::ReadOnly->new(%params); }
+		when("rw"){ return File::StableOrder::ReadWrite->new(%params); }
+		when("w"){  return File::StableOrder::WriteOnly->new(%params); }
+		default{
+			croak "Unknown mode: $mode.";
+		}
+	}
 }
 
 =head1 AUTHOR
