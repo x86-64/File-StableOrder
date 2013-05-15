@@ -38,6 +38,13 @@ sub new {
 	return $self;
 }
 
+sub rewind {
+	my ($self) = @_;
+
+	$self->{_input}->rewind;
+	$self->{_output}->rewind;
+}
+
 sub readline {
 	my $self = shift;
 
