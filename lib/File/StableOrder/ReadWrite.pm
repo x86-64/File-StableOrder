@@ -9,9 +9,9 @@ sub new {
 	
 	my $self = bless $class->SUPER::new(%params), $class;
 	
-	return undef if $self->_size > 0;
+	return undef if $self->size() > 0;
 	
-	$self->{_out}        = $self->_open($self->_tmpfilename());
+	$self->{_out}        = $self->_open(">", $self->_tmpfilename());
 	$self->{_write_pos}  = 0;
 	$self->{_return_arr} = {};
 	
@@ -21,7 +21,7 @@ sub new {
 sub size {
 	my ($self) = @_;
 	
-	return (-s $self->_tmpfilename());
+	return (-s $self->_tmpfilename()) || 0;
 }
 
 sub returnline {
@@ -55,7 +55,9 @@ sub DESTROY {
 	my ($self) = @_;
 	
 	croak "Return array still contain elements"
-		if scalar keys $self->{_return_arr} > 0;
+		if scalar keys %{$self->{_return_arr}} > 0;
+	
+	rename($self->_tmpfilename(), $self->{filename});
 	
 	$self->SUPER::DESTROY();
 }

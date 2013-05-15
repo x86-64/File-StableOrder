@@ -8,7 +8,7 @@ sub new {
 
 	my $self = bless { %params, _pos => 0 }, $class;
 
-	$self->{_in} = $self->_open($self->{filename});
+	$self->{_in} = $self->_open("<", $self->{filename});
 	
 	return $self;
 }
@@ -22,7 +22,7 @@ sub pos {
 sub readline {
 	my ($self) = @_;
 	
-	my $line = $self->_readline($self->{_in});
+	my $line = $self->_readline($self->{_in}) or return undef;
 	my $pos  = $self->{_pos}++;
 	
 	return File::StableOrder::Item->new(i => $line, _pos => $pos);
@@ -41,10 +41,10 @@ sub DESTROY {
 }
 
 sub _open {
-	my ($self, $filename) = @_;
+	my ($self, $mode, $filename) = @_;
 
 	my $io;
-	open $io, "<", $filename or
+	open $io, $mode, $filename or
 		croak $!;
 	
 	return $io;
@@ -60,7 +60,7 @@ sub _readline {
 	my ($self, $io) = @_;
 
 	my $line = <$io>;
-	chomp $line;
+	chomp $line if defined $line;
 	return $line;
 }
 
