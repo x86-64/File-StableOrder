@@ -9,6 +9,12 @@ sub new {
 	return $self;
 }
 
+sub pos {
+	my $self = shift;
+
+	return $self->{_pos};
+}
+
 sub size {
 	my ($self) = @_;
 	
@@ -46,6 +52,14 @@ sub _writeline {
 	
 	my $io = $self->{_fh};
 	print $io $line, $/;
+}
+
+sub _truncate {
+	my ($self) = @_;
+
+	my $io = $self->{_fh};
+	truncate $io, 0;
+	$self->{_pos} = 0;
 }
 
 sub _close {

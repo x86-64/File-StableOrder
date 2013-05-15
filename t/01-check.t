@@ -5,9 +5,13 @@ use warnings FATAL => 'all';
 use Test::More;
 use File::StableOrder::ReadWrite;
 
-plan tests => 2;
+plan tests => 3;
 
 my $testfile = "test.txt";
+my $testfile_incomplete = ".test.txt";
+
+unlink($testfile);
+unlink($testfile_incomplete);
 
 # prepare file
 sub testfile_create {
@@ -72,4 +76,21 @@ while(scalar @arr){
 undef $file;
 
 ok(testfile_check($testfile, 4 .. 10001), "Random return loop");
+
+# INCOMPLETE FILE
+testfile_create($testfile, 3 .. 10000);
+testfile_create($testfile_incomplete, 4 .. 100);
+$file = File::StableOrder::ReadWrite->new(
+	filename => $testfile,
+	continue => 1,
+);
+while(my $item = $file->readline()){
+	$item->{i} = $item->{i}+1; 
+	
+	$file->returnline($item);
+}
+undef $file;
+
+ok(testfile_check($testfile, 4 .. 10001), "Incomplete file");
+
 

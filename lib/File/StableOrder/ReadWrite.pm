@@ -12,6 +12,22 @@ sub new {
 	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $params{filename});
 	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
 	
+	if($self->{_output}->size > 0){
+		if(defined $params{truncate}){
+			$self->{_output}->truncate();
+		}elsif(defined $params{continue}){
+			$self->{_output}->restore_pos();
+			
+			for(1..$self->{_output}->pos){
+				my $line = $self->{_input}->readline();
+			}
+		}else{
+			undef $self->{_output};
+			undef $self->{_input};
+			croak "Found incomplete output file from previous run. Specify 'truncate' or 'continue' in parameters";
+		}
+	}
+
 	return $self;
 }
 
@@ -39,13 +55,14 @@ sub _tmpfilename {
 sub DESTROY {
 	my ($self) = @_;
 	
-	rename(
-		$self->{_output}->{filename},
-		$self->{_input}->{filename}
-	) || croak "Failed to move file";
-	
-	undef $self->{_output};
-	undef $self->{_input};
+	if(defined $self->{_output} and defined $self->{_input}){
+		rename(
+			$self->{_output}->{filename},
+			$self->{_input}->{filename}
+		) || croak "Failed to move file";
+	}
+	delete $self->{_output};
+	delete $self->{_input};
 }
 
 1;

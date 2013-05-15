@@ -9,9 +9,11 @@ sub new {
 	
 	my $self = bless $class->SUPER::new(%params), $class;
 	
-	return undef if $self->size() > 0;
+	eval {
+		$self->_open("+<", $self->{filename});
+	} or 
+		$self->_open(">", $self->{filename});
 	
-	$self->_open(">", $self->{filename});
 	$self->{_return_arr} = {};
 	
 	return $self;
@@ -22,6 +24,22 @@ sub returnline {
 	
 	$self->{_return_arr}->{$item->pos} = $item;
 	$self->_flush();
+}
+
+sub truncate {
+	my ($self) = @_;
+	
+	$self->_truncate();
+}
+
+sub restore_pos {
+	my ($self) = @_;
+	
+	$self->_seek(0, 0); # Start Of File
+	$self->{_pos} = 0;
+	while(my $line = $self->_readline()){
+		$self->{_pos}++;
+	}
 }
 
 sub _flush {
