@@ -54,6 +54,7 @@ sub readline {
 sub returnline {
 	my $self = shift;
 	
+	$self->{_have_changes} = 1;
 	return $self->{_output}->returnline(@_);
 }
 
@@ -66,17 +67,39 @@ sub _tmpfilename {
 	return $filename;
 }
 
+sub finish {
+	my $self      = shift;
+	my $final     = (shift || 0);
+	
+	return if defined $self->{_donot_rename};
+	return if not defined $self->{_output};
+	return if not defined $self->{_input};
+	
+	if(defined $self->{_have_changes}){
+		my ($in, $out) = ($self->{filename}, $self->_tmpfilename);
+		
+		undef $self->{_output}; # flush changes to disk
+		undef $self->{_input};
+		
+		rename(
+			$out,
+			$in,
+		) || croak "Failed to finalize file";
+		
+		delete $self->{_have_changes};
+	}else{
+		unlink($self->_tmpfilename);
+	}
+	
+	return if $final != 0;
+	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $self->{filename});
+	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
+}
+
 sub DESTROY {
 	my ($self) = @_;
 	
-	if(defined $self->{_output} and defined $self->{_input} and not defined $self->{_donot_rename}){
-		rename(
-			$self->{_output}->{filename},
-			$self->{_input}->{filename}
-		) || croak "Failed to move file";
-	}
-	delete $self->{_output};
-	delete $self->{_input};
+	$self->finish(1); # don't recreate file
 }
 
 1;
