@@ -1,34 +1,30 @@
 package File::StableOrder::ReadWrite;
 
-use base 'File::StableOrder::ReadOnly';
-
 use Carp;
+use File::StableOrder::ReadOnly;
+use File::StableOrder::WriteOnly;
 
 sub new {
 	my ($class, %params) = @_;
 	
-	my $self = bless $class->SUPER::new(%params), $class;
+	my $self = bless { %params }, $class;
 	
-	return undef if $self->size() > 0;
-	
-	$self->{_out}        = $self->_open(">", $self->_tmpfilename());
-	$self->{_write_pos}  = 0;
-	$self->{_return_arr} = {};
+	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $params{filename});
+	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
 	
 	return $self;
 }
 
-sub size {
-	my ($self) = @_;
-	
-	return (-s $self->_tmpfilename()) || 0;
+sub readline {
+	my $self = shift;
+
+	return $self->{_input}->readline();
 }
 
 sub returnline {
-	my ($self, $item) = @_;
+	my $self = shift;
 	
-	$self->{_return_arr}->{$item->pos} = $item;
-	$self->_flush();
+	return $self->{_output}->returnline(@_);
 }
 
 sub _tmpfilename {
@@ -40,26 +36,16 @@ sub _tmpfilename {
 	return $filename;
 }
 
-sub _flush {
-	my ($self) = @_;
-	
-	while(defined $self->{_return_arr}->{$self->{_write_pos}}){
-		my $item = delete $self->{_return_arr}->{$self->{_write_pos}};
-		$self->_writeline($self->{_out}, $item->{i});
-		
-		$self->{_write_pos}++;
-	}
-}
-
 sub DESTROY {
 	my ($self) = @_;
 	
-	croak "Return array still contain elements"
-		if scalar keys %{$self->{_return_arr}} > 0;
+	rename(
+		$self->{_output}->{filename},
+		$self->{_input}->{filename}
+	) || croak "Failed to move file";
 	
-	rename($self->_tmpfilename(), $self->{filename});
-	
-	$self->SUPER::DESTROY();
+	undef $self->{_output};
+	undef $self->{_input};
 }
 
 1;
