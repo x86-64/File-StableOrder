@@ -9,8 +9,15 @@ sub new {
 	
 	my $self = bless { %params }, $class;
 	
+	my $output_filename = $params{output_filename};
+	if(defined $output_filename){
+		$self->{_donot_rename} = 1;
+	}else{
+		$output_filename = $self->_tmpfilename;
+	}
+
 	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $params{filename});
-	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
+	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $output_filename);
 	
 	if($self->{_output}->size > 0){
 		if(defined $params{truncate}){
@@ -55,7 +62,7 @@ sub _tmpfilename {
 sub DESTROY {
 	my ($self) = @_;
 	
-	if(defined $self->{_output} and defined $self->{_input}){
+	if(defined $self->{_output} and defined $self->{_input} and not defined $self->{_donot_rename}){
 		rename(
 			$self->{_output}->{filename},
 			$self->{_input}->{filename}
