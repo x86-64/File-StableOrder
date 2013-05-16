@@ -1,15 +1,27 @@
 File-StableOrder
 
-The README is used to introduce the module and provide instructions on
-how to install the module, any machine dependencies it may have (for
-example C compilers and installed libraries) and any other information
-that should be provided before the module is installed.
+Module keep same order of items in file even if items returned in wrong order, for example, from multithreaded code.
+    
+    use File::StableOrder;
 
-A README file is required for CPAN modules since CPAN extracts the README
-file from a module distribution so that people browsing the archive
-can use it to get an idea of the module's uses. It is usually a good idea
-to provide version information here so that people can decide whether
-fixes for the module are worth downloading.
+    my $foo = File::StableOrder->new(
+    	filename => "file.txt",
+	mode     => "r",          # "r", "rw", "w"
+	...
+	# for Read-Write
+	truncate => 1, # truncate file if there are previous results in file OR
+	continue => 1, # continue processing from last element OR
+	merge    => 1, # merge info from temporary file into main
+	output_filename => "output.txt",  #  use this file to store results. original file will be unchanged
+    );
+    ...
+    $foo->rewind;                           # start from beginning of file
+    while(my $item = $foo->readline()){     # read item,
+       $item->{i} = int($item->{i}) + 1;    # process it,
+       
+       $foo->returnline($item);             # and return
+    }
+    $foo->finish;                           # save results and rewind to start
 
 
 INSTALLATION

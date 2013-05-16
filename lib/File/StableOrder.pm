@@ -42,11 +42,13 @@ Perhaps a little code snippet.
 	output_filename => "output.txt",  #  use this file to store results. original file will be unchanged
     );
     ...
-    while(my $item = $foo->readline()){
-       $item->{i} = int($item->{i}) + 1;
+    $foo->rewind;                           # start from beginning of file
+    while(my $item = $foo->readline()){     # read item,
+       $item->{i} = int($item->{i}) + 1;    # process it,
        
-       $foo->returnline($item);
+       $foo->returnline($item);             # and return
     }
+    $foo->finish;                           # save results and rewind to start
 
 =head1 EXPORT
 
