@@ -37,7 +37,8 @@ Perhaps a little code snippet.
 	...
 	# for Read-Write
 	truncate => 1, # truncate file if there are previous results in file OR
-	continue => 1, # continue processing from last element
+	continue => 1, # continue processing from last element OR
+	merge    => 1, # merge info from temporary file into main
 	output_filename => "output.txt",  #  use this file to store results. original file will be unchanged
     );
     ...

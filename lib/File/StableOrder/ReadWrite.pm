@@ -30,6 +30,19 @@ sub new {
 			for(1..$self->{_output}->pos){
 				my $line = $self->{_input}->readline();
 			}
+		}elsif(defined $params{merge}){
+			$self->{_output}->restore_pos();
+			
+			# skip same
+			for(1..$self->{_output}->pos){
+				my $line = $self->{_input}->readline();
+			}
+			
+			while(my $line = $self->{_input}->readline()){
+				$self->{_have_changes} = 1;
+				$self->{_output}->returnline($line);
+			}
+			$self->finish;
 		}else{
 			undef $self->{_output};
 			undef $self->{_input};
