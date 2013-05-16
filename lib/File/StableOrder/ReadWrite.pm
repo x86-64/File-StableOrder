@@ -9,6 +9,8 @@ sub new {
 	
 	my $self = bless { %params }, $class;
 	
+	$self->reown();
+	
 	my $output_filename = $params{output_filename};
 	if(defined $output_filename){
 		$self->{_donot_rename} = 1;
@@ -36,6 +38,12 @@ sub new {
 	}
 
 	return $self;
+}
+
+sub reown {
+	my ($self) = @_;
+	
+	$self->{_pid} = $$;
 }
 
 sub rewind {
@@ -98,6 +106,8 @@ sub finish {
 
 sub DESTROY {
 	my ($self) = @_;
+	
+	return if $self->{_pid} != $$;
 	
 	$self->finish(1); # don't recreate file
 }
