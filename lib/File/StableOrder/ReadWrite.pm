@@ -90,7 +90,6 @@ sub _tmpfilename {
 
 sub finish {
 	my $self      = shift;
-	my $final     = (shift || 0);
 	
 	return if defined $self->{_donot_rename};
 	return if not defined $self->{_output};
@@ -112,7 +111,6 @@ sub finish {
 		unlink($self->_tmpfilename);
 	}
 	
-	return if $final != 0;
 	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $self->{filename});
 	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
 }
@@ -122,7 +120,11 @@ sub DESTROY {
 	
 	return if $self->{_pid} != $$;
 	
-	$self->finish(1); # don't recreate file
+	return if defined $self->{_donot_rename};
+	
+	if(-z $self->_tmpfilename){
+		unlink($self->_tmpfilename);
+	}
 }
 
 1;
