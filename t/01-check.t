@@ -53,6 +53,7 @@ while(my $item = $file->readline()){
 	
 	$file->returnline($item);
 }
+$file->finish;
 undef $file;
 
 ok(testfile_check($testfile, 2 .. 10001), "Inc loop");
@@ -74,7 +75,7 @@ while(scalar @arr){
 	
 	$file->returnline($item);
 }
-
+$file->finish;
 undef $file;
 
 ok(testfile_check($testfile, 4 .. 10001), "Random return loop");
@@ -92,6 +93,7 @@ while(my $item = $file->readline()){
 	
 	$file->returnline($item);
 }
+$file->finish;
 undef $file;
 
 ok(testfile_check($testfile, 4 .. 10001), "Incomplete file");
