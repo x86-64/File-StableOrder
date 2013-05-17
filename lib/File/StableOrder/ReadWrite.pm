@@ -9,6 +9,8 @@ sub new {
 	
 	my $self = bless { %params }, $class;
 	
+	$self->reown();
+	
 	my $output_filename = $params{output_filename};
 	if(defined $output_filename){
 		$self->{_donot_rename} = 1;
@@ -51,6 +53,12 @@ sub new {
 	return $self;
 }
 
+sub reown {
+	my ($self) = @_;
+	
+	$self->{_pid} = $$;
+}
+
 sub rewind {
 	my ($self) = @_;
 
@@ -82,6 +90,7 @@ sub _tmpfilename {
 
 sub finish {
 	my $self      = shift;
+	my $final     = (shift || 0);
 	
 	return if defined $self->{_donot_rename};
 	return if not defined $self->{_output};
@@ -103,8 +112,17 @@ sub finish {
 		unlink($self->_tmpfilename);
 	}
 	
+	return if $final != 0;
 	$self->{_input}  = File::StableOrder::ReadOnly->new (filename => $self->{filename});
 	$self->{_output} = File::StableOrder::WriteOnly->new(filename => $self->_tmpfilename);
+}
+
+sub DESTROY {
+	my ($self) = @_;
+	
+	return if $self->{_pid} != $$;
+	
+	$self->finish(1); # don't recreate file
 }
 
 1;
