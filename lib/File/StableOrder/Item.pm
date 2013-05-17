@@ -8,7 +8,11 @@ sub new {
 }
 
 sub pos {
-	my ($self) = @_;
+	my $self = shift;
+	
+	if(@_){
+		$self->{_pos} = shift;
+	}
 	
 	$self->{_pos};
 }
