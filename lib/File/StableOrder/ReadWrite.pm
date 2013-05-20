@@ -66,6 +66,12 @@ sub rewind {
 	$self->{_output}->rewind;
 }
 
+sub truncate {
+	my ($self) = @_;
+	
+	$self->{_output}->truncate;
+}
+
 sub readline {
 	my $self = shift;
 
