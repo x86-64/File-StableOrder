@@ -72,6 +72,18 @@ sub truncate {
 	$self->{_output}->truncate;
 }
 
+sub pos_read { 
+	my ($self) = @_;
+	
+	return $self->{_input}->pos;
+}
+
+sub pos_write { 
+	my ($self) = @_;
+	
+	return $self->{_output}->pos;
+}
+
 sub readline {
 	my $self = shift;
 
