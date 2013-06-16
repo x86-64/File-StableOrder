@@ -22,6 +22,13 @@ sub pos {
 	return $self->{_pos};
 }
 
+sub skipline {
+	my ($self) = @_;
+	
+	my $line = $self->_readline() or return undef;
+	$self->{_pos}++;
+}
+
 sub readline {
 	my ($self) = @_;
 	

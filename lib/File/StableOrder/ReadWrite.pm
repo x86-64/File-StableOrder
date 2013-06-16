@@ -28,14 +28,14 @@ sub new {
 			$self->{_output}->restore_pos();
 			
 			for(1..$self->{_output}->pos){
-				my $line = $self->{_input}->readline();
+				my $line = $self->{_input}->skipline();
 			}
 		}elsif(defined $params{merge}){
 			$self->{_output}->restore_pos();
 			
 			# skip same
 			for(1..$self->{_output}->pos){
-				my $line = $self->{_input}->readline();
+				my $line = $self->{_input}->skipline();
 			}
 			
 			while(my $line = $self->{_input}->readline()){
