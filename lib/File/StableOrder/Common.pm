@@ -32,9 +32,12 @@ sub _open {
 	my ($self, $mode, $filename) = @_;
 
 	my $io;
-	open $io, $mode, $filename or
-		croak $!;
-	
+	if($filename eq "-"){
+		$io = \*STDIN;
+	}else{
+		open $io, $mode, $filename or
+			croak $!;
+	}
 	$self->{_fh} = $io;
 }
 
