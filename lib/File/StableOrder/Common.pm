@@ -61,7 +61,7 @@ sub _writeline {
 	my ($self, $line) = @_;
 	
 	my $io = $self->{_fh};
-	print $io $line, $/;
+	print $io $line, "\n";
 }
 
 sub _truncate {
